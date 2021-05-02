@@ -1,0 +1,15 @@
+﻿<Window x:Class="CloseWin.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CloseWin"
+        xmlns:vm="clr-namespace:CloseWin.Core;assembly=CloseWin.Core"
+        d:DataContext="{x:Static vm:Test.mainDesignVm}"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Button Width="120" Command="{Binding ShowWin}"
+                Height="60" Content="Open Window" FontSize="16" FontWeight="Bold"/>
+    </Grid>
+</Window>

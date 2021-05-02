@@ -1,0 +1,18 @@
+﻿<Window x:Class="CloseWin.ModalWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CloseWin"
+        xmlns:uc="clr-namespace:CloseWin"
+        xmlns:vm="clr-namespace:CloseWin.Core;assembly=CloseWin.Core"
+        d:DataContext="{x:Static vm:Test.windowDesignVm}"
+        mc:Ignorable="d"
+        Title="ModalWindow" Height="450" Width="800">
+    <Grid>
+        <StackPanel>
+            <uc:SubModel DataContext="{Binding SubModel}"
+                d:DataContext="{Binding DataContext.SubModel, RelativeSource={RelativeSource AncestorType=StackPanel}}"/>
+        </StackPanel>
+    </Grid>
+</Window>
