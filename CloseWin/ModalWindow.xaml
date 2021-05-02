@@ -10,8 +10,7 @@
         Title="ModalWindow" Height="450" Width="800">
     <Grid>
         <StackPanel>
-            <uc:SubModel DataContext="{Binding SubModel}"
-                d:DataContext="{Binding DataContext.SubModel, RelativeSource={RelativeSource AncestorType=StackPanel}}"/>
+            <uc:SubModel DataContext="{Binding SubModel}" />
         </StackPanel>
     </Grid>
 </Window>
