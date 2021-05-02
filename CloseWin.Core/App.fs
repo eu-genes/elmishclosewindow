@@ -67,7 +67,8 @@ module Main =
             | WinMsg msg' -> 
                 match m.Win with
                     | Some m' -> 
-                        if m'.Id > 0 then {m with Id = m'.Id; Win = None} 
+                        if m'.Id > 0
+                        then {m with Id = m'.Id; Win = None} 
                         else {m with Win = Some <| ModalWin.update msg' m'} 
                     | None -> m
                 
