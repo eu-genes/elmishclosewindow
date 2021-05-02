@@ -67,9 +67,10 @@ module Main =
             | WinMsg msg' -> 
                 match m.Win with
                     | Some m' -> 
-                        if m'.Id > 0
-                        then {m with Id = m'.Id; Win = None} 
-                        else {m with Win = Some <| ModalWin.update msg' m'} 
+                        let m'' = ModalWin.update msg' m'
+                        if m''.Sub.Id > 0
+                        then {m with Id = m''.Sub.Id; Win = None} 
+                        else {m with Win = Some m''} 
                     | None -> m
                 
     let bindings (win: unit -> #Window) () : Binding<Model, Msg> list = [
