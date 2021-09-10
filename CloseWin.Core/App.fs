@@ -1,26 +1,56 @@
 ﻿module CloseWin.Core.Test
 open System
+open System.IO
 open System.Windows
 open Serilog
 open Microsoft.Extensions.Logging
+open Elmish
 open Elmish.WPF
 module SubModel =
 
     type Model = {
         Id: int
+        Text: string
+        StatusMsg: string
     }
 
-    let init () = {Id = 0}
+    let init () = {Id = 0; Text = ""; StatusMsg = ""}, []
 
     type Msg =
         | RandomId
+        | RequestLoad
+        | LoadSuccess of string
+        | LoadCanceled
+        | LoadFailed of exn
+
+    let load () =
+      async {
+        let dlg = Microsoft.Win32.OpenFileDialog ()
+        dlg.Filter <- "Text file (*.txt)|*.txt|Markdown file (*.md)|*.md"
+        dlg.DefaultExt <- "txt"
+        let result = dlg.ShowDialog ()
+        if result.HasValue && result.Value then
+          use reader = File.OpenText(dlg.FileName)
+          let! contents = reader.ReadToEndAsync () |> Async.AwaitTask
+          return LoadSuccess contents
+        else return LoadCanceled
+      }
 
     let update msg m =
         match msg with
-            | RandomId -> { m with Id = System.Random().Next(1, 1000)}
+            | RandomId -> { m with Id = System.Random().Next(1, 1000)}, Cmd.none
+            | RequestLoad -> m, Cmd.OfAsync.either load () id LoadFailed
+            | LoadSuccess s -> { m with Text = s; StatusMsg = sprintf "Successfully loaded at %O" DateTimeOffset.Now }, Cmd.none
+            | LoadCanceled -> { m with StatusMsg = "Loading canceled" }, Cmd.none
+            | LoadFailed ex -> { m with StatusMsg = sprintf "Loading failed with exception %s: %s" (ex.GetType().Name) ex.Message }, Cmd.none
+
 
     let bindings () : Binding<Model, Msg> list = [
         "Random" |> Binding.cmd RandomId
+
+        "Text" |> Binding.oneWay ((fun m -> m.Text))
+        "StatusMsg" |> Binding.oneWay ((fun m -> m.StatusMsg))
+        "Load" |> Binding.cmd RequestLoad
     ]
 
 module ModalWin =
@@ -30,15 +60,15 @@ module ModalWin =
         Sub: SubModel.Model
     }
 
-    let init () = {Id = 0; Sub = SubModel.init ()}
+    let init () = {Id = 0; Sub = SubModel.init () |> fst}
 
     type Msg = 
         | SubMsg of SubModel.Msg
 
     let update msg m =
         match msg with
-            | SubMsg (SubModel.RandomId) -> 
-                {m with Id = m.Sub.Id; Sub = SubModel.update (SubModel.RandomId) m.Sub}
+            | SubMsg msg' -> 
+                {m with Id = m.Sub.Id; Sub = SubModel.update msg' m.Sub |> fst}
                 
     let bindings () : Binding<Model, Msg> list = [
         "SubModel" |> Binding.subModel(
@@ -88,7 +118,7 @@ module Main =
 let fail _ = failwith "never called"
 let mainDesignVm = ViewModel.designInstance (Main.init ()) (Main.bindings fail ())
 let windowDesignVm = ViewModel.designInstance (ModalWin.init ()) (ModalWin.bindings ())
-let subModelDesignVm = ViewModel.designInstance (SubModel.init ()) (SubModel.bindings ())
+let subModelDesignVm = ViewModel.designInstance (SubModel.init () |> fst) (SubModel.bindings ())
 
 let main mainWindow (win: Func<#Window>) =
 
